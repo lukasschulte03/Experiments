@@ -25,4 +25,4 @@ def winner(p1, p2):
         return "\nPlayer won!"
 
 print(str(winner(player - 1, opponent - 1)))
-print(" \n ")
+print(" \n ") 
