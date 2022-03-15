@@ -1,9 +1,4 @@
-from dis import dis
 import random
-
-print(" \n ")
-
-numbers = [1,2,3,1]
  
 dic = {
     1 : "rock",
@@ -20,13 +15,17 @@ def winner(p1, p2):
             return "\nPlayer won!"
 
 while True:
-    player = random.randint(1,3)
     opponent = random.randint(1,3)
-    print("\n---------------------------------------------")
+    print("\n---------------------------------------------\n")
+    player = input("Choose: (1)Rock, (2)Paper, (3)Scissors: ") 
+    while player not in ["1", "2", "3"]:
+        player = input("Invalid input, choose: (1)Rock, (2)Paper, (3)Scissors: ") 
+    player = int(player)
     print("\nplayer chose: " + dic[player])
     print("opponent chose: " + dic[opponent])
     print(str(winner(player - 1, opponent - 1)))
-
     answer = input("\nPlay again? y/n: ") 
-    if answer != "y":
+    if answer.lower() == "y" or answer.lower() == "yes":
+        continue
+    else:
         break
