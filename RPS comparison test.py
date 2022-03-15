@@ -4,7 +4,7 @@ import random
 print(" \n ")
 
 numbers = [1,2,3,1]
-
+ 
 dic = {
     1 : "rock",
     2 : "paper",
