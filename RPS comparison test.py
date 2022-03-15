@@ -11,13 +11,7 @@ dic = {
     3 : "scissors",
 }
 
-while True:
-    player = random.randint(1,3)
-    opponent = random.randint(1,3)
-    print("player chose: " + dic[player])
-    print("opponent chose: " + dic[opponent])
-
-    def winner(p1, p2):
+def winner(p1, p2):
         if (p1 +1) % 3 == p2:
             return "\nOpponent won!"
         elif p1 == p2:
@@ -25,6 +19,11 @@ while True:
         else:
             return "\nPlayer won!"
 
+while True:
+    player = random.randint(1,3)
+    opponent = random.randint(1,3)
+    print("player chose: " + dic[player])
+    print("opponent chose: " + dic[opponent])
     print(str(winner(player - 1, opponent - 1)))
     print(" \n ")
 
