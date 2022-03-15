@@ -11,18 +11,23 @@ dic = {
     3 : "scissors",
 }
 
-player = random.randint(1,3)
-opponent = random.randint(1,3)
-print("player: " + dic[player])
-print("opponent: " + dic[opponent])
+while True:
+    player = random.randint(1,3)
+    opponent = random.randint(1,3)
+    print("player chose: " + dic[player])
+    print("opponent chose: " + dic[opponent])
 
-def winner(p1, p2):
-    if (p1 +1) % 3 == p2:
-        return "\nOpponent won!"
-    elif p1 == p2:
-        return "\nIt is a draw!"
-    else:
-        return "\nPlayer won!"
+    def winner(p1, p2):
+        if (p1 +1) % 3 == p2:
+            return "\nOpponent won!"
+        elif p1 == p2:
+            return "\nIt is a draw!"
+        else:
+            return "\nPlayer won!"
 
-print(str(winner(player - 1, opponent - 1)))
-print(" \n ") 
+    print(str(winner(player - 1, opponent - 1)))
+    print(" \n ")
+
+    answer = input("Play again? y/n: ") 
+    if answer != "y":
+        break
