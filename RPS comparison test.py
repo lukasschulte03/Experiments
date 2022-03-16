@@ -29,7 +29,7 @@ def winner(p1, p2, p1name, p2name):
             return "\n" + color.GREEN + color.BOLD + "It is a draw!" + color.END
         else:
             return "\n" + color.PURPLE + color.BOLD + p1name + color.END + " won!"
-
+ 
 def ComputerGame():
     while True:
         opponent = random.randint(1,3)
