@@ -1,4 +1,5 @@
 import random
+import keyboard
 
 class color:
    PURPLE = '\033[95m'
@@ -81,3 +82,6 @@ elif answer == "2":
     ComputerGame()
 else:
     quit()
+
+#keyboard.on_press_key("m", LineSpam(10))
+
