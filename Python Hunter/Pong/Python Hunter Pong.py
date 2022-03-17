@@ -95,7 +95,7 @@ while 1:
     pygame.draw.line(screen,(255,255,255),(screen.get_width()/2-25,0),(screen.get_width()/2-25,50),3)
     pygame.draw.line(screen,(255,255,255),(screen.get_width()/2+25,0),(screen.get_width()/2+25,50),3)
     pygame.draw.line(screen,(255,255,255),(screen.get_width()/2-25,50),(screen.get_width()/2+25,50),3)
-    pygame.draw.circle(screen,(255,255,255),(screen.get_width()/2, screen.get_height()/2),50,3) 
+    pygame.draw.circle(screen,(255,255,255),(screen.get_width()//2, screen.get_height()//2),50,3) 
     txt = font.render(str(int(time.time() - match_start)),True,(255,255,255))
     screen.blit(txt,(screen.get_width()/2 -txt.get_width()/2,20))
      
