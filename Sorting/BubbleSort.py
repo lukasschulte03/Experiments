@@ -1,5 +1,3 @@
-from smtplib import OLDSTYLE_AUTH
-from tracemalloc import start
 import pygame, sys, random
 from pygame.locals import *
 pygame.init()
