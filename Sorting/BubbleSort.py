@@ -1,19 +1,21 @@
-import pygame, sys, random
+from tracemalloc import start
+import pygame, sys, random, math
 from pygame.locals import *
 pygame.init()
 pygame.display.set_caption("Sorting Visualizer")
-WIDTH = 1600
-HEIGHT = 900
+WIDTH = 1920
+HEIGHT = 1080
 SCREEN = pygame.display.set_mode((WIDTH,HEIGHT))
 CLOCK = pygame.time.Clock()
 FONT = pygame.font.SysFont(None, 30)
-listLength = 500
+listLength = WIDTH
 COLOR_INACTIVE = (100, 80, 255)
 COLOR_ACTIVE = (100, 200, 255)
 COLOR_LIST_INACTIVE = (255, 100, 100)
 COLOR_LIST_ACTIVE = (255, 150, 150)
 speedMultiplier = 5
 iteration = 0
+maxValue = 0
 
 
 
@@ -170,8 +172,23 @@ functionDic = {
     "CycleSort" : 7
 
 }
+i = 1
+startList = []
 
-startList = [i for i in range(listLength)]
+def Sigmoid(x):
+    return 1/(1 + 2.71828182846**(-x/(listLength/10)))
+
+def GenerateList(len):
+    startList.clear()
+    global maxValue
+    for i in range(1,len):
+        startList.append(Sigmoid(i-(len/2)))#+ (math.sin((i/(len/4)))+1)*100)
+    maxValue = max(startList)
+    return startList
+
+GenerateList(listLength)
+
+print(min(startList))
 
 def printList(l):
     for i, x in enumerate(l):
@@ -387,11 +404,16 @@ def Sort(function, l):
 
 def UpdateDisplay(lst = startList): 
     global iteration
+    thickness = 1
     iteration += 1
     if (iteration % speedMultiplier == 0):
         SCREEN.fill((0,0,0))      
+        if (WIDTH//listLength < 1):
+            thickness = 1
+        else:
+            thickness = WIDTH//listLength
         for i, x in enumerate(lst):
-            pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength//2 ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength//2 , HEIGHT - x*(HEIGHT/listLength)), WIDTH//listLength)
+            pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength//2 ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength//2 , HEIGHT - (x*(HEIGHT/maxValue))), thickness)
     list1.draw(SCREEN) 
     sortButton.draw(SCREEN)
     shuffleButton.draw(SCREEN)
@@ -406,7 +428,7 @@ def RandomizeList(l):
             UpdateDisplay(l)
     return l
 
-startList = RandomizeList(startList)
+#RandomizeList(startList)
 
 def CheckListLenChange(old, new):
     if (old != new):
@@ -418,8 +440,9 @@ oldLen = listLength
 while 1:
     newLen = listLength
     if (oldLen != newLen):
-        startList = [i for i in range(listLength)]
+        GenerateList(listLength)
         startList = RandomizeList(startList)
+        maxValue = max(startList)
     oldLen = listLength
     UpdateDisplay(startList)
     event_list = pygame.event.get()
