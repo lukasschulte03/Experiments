@@ -2,8 +2,8 @@ import pygame, sys, random
 from pygame.locals import *
 pygame.init()
 pygame.display.set_caption("Sorting Visualizer")
-WIDTH = 2000
-HEIGHT = 600
+WIDTH = 1920
+HEIGHT = 1080
 SCREEN = pygame.display.set_mode((WIDTH,HEIGHT))
 CLOCK = pygame.time.Clock()
 FONT = pygame.font.SysFont(None, 30)
