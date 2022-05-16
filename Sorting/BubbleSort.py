@@ -13,6 +13,7 @@ COLOR_ACTIVE = (100, 200, 255)
 COLOR_LIST_INACTIVE = (255, 100, 100)
 COLOR_LIST_ACTIVE = (255, 150, 150)
 speedMultiplier = 5
+iteration = 0
 
 
 
@@ -172,46 +173,35 @@ functionDic = {
 
 startList = [i for i in range(listLength)]
 
-
-
 def printList(l):
     for i, x in enumerate(l):
         print(x)
 
 def BubbleSort(l):
-    iteration = 0
-    iteration = 0
     indexLen = len(l)-1
     sorted = False
     while not sorted:
-        iteration += 1
         sorted = True
         for i in range(0, indexLen):
             if (i < indexLen):
                 if (l[i] > l[i + 1]):
                     l[i], l[i + 1] = l[i + 1], l[i]
                     sorted = False
-        if (iteration % speedMultiplier == 0):
-            UpdateDisplay(l)
+        UpdateDisplay(l)
     return l
 
-
-
 def QuickSort(l):
-    iteration = 0
     if len(l) < 2:                      # if nothing to sort, return
         return
     stack = []                          # initialize stack
     stack.append([0, len(l)-1])
     while len(stack) > 0: 
-        iteration += 1              # loop till stack empty
         lo, hi = stack.pop()            # pop lo, hi indexes
         p = l[(lo + hi) // 2]           # pivot, any a[] except a[hi]
         i = lo - 1                      # Hoare partition
         j = hi + 1
         while(1):
-            if (iteration % speedMultiplier == 0):
-                UpdateDisplay(l)
+            UpdateDisplay(l)
             while(1):                   #  while(a[++i] <; p)
                 i += 1
                 if(l[i] >= p):
@@ -231,11 +221,8 @@ def QuickSort(l):
     return(l)
 
 def InsertionSort(l):
-    iteration = 0
     for i in range(1, len(l)):
-        iteration += 1
-        if (iteration % speedMultiplier == 0):
-            UpdateDisplay(l)
+        UpdateDisplay(l)
         while l[i-1] > l[i] and i > 0:
             l[i-1], l[i] = l[i], l[i-1]
             i -= 1
@@ -271,9 +258,7 @@ def CountingSort(l):
         UpdateDisplay()
 
 def SelectionSort(l):
-    iteration = 0
     for i in range(0,len(l)-1):
-        iteration += 1
         p=0
         mini=l[-1]
         for j in range(i,len(l)):
@@ -281,12 +266,10 @@ def SelectionSort(l):
                 mini=l[j]
                 p=j
         l[i],l[p]=l[p],l[i]
-        if (iteration % speedMultiplier == 0):
-            UpdateDisplay(l)
+        UpdateDisplay(l)
     return l
 
 def CombSort(l):
-    iteration = 0
     def getNextGap(gap):
         gap = (gap * 10)/13
         if gap < 1:
@@ -301,10 +284,8 @@ def CombSort(l):
         gap = getNextGap(gap)
         swapped = False
         for i in range(0, n-gap):
-            iteration += 1
-            if (iteration % speedMultiplier == 0):
-                UpdateDisplay(l)
             if l[i] > l[i + gap]:
+                UpdateDisplay(l)
                 l[i], l[i + gap]=l[i + gap], l[i]
                 swapped = True
     return l
@@ -312,11 +293,8 @@ def CombSort(l):
     return l
 
 def HeapSort(l):
-    iteration = 0
     def heapify(l, n, i):
-        iteration += 1
-        if (iteration % speedMultiplier == 0):
-            UpdateDisplay(l)
+        UpdateDisplay(l)
         largest = i  
         left = (2 * i) + 1    
         right = (2 * i) + 2 
@@ -408,9 +386,12 @@ def Sort(function, l):
     CaseMachine(functionDic[function], l)
 
 def UpdateDisplay(lst = startList): 
-    SCREEN.fill((0,0,0))      
-    for i, x in enumerate(lst):
-        pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength//2 ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength//2 , HEIGHT - x*(HEIGHT/listLength)), WIDTH//listLength)
+    global iteration
+    iteration += 1
+    if (iteration % speedMultiplier == 0):
+        SCREEN.fill((0,0,0))      
+        for i, x in enumerate(lst):
+            pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength//2 ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength//2 , HEIGHT - x*(HEIGHT/listLength)), WIDTH//listLength)
     list1.draw(SCREEN) 
     sortButton.draw(SCREEN)
     shuffleButton.draw(SCREEN)
