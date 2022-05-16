@@ -12,6 +12,7 @@ COLOR_INACTIVE = (100, 80, 255)
 COLOR_ACTIVE = (100, 200, 255)
 COLOR_LIST_INACTIVE = (255, 100, 100)
 COLOR_LIST_ACTIVE = (255, 150, 150)
+speedMultiplier = 5
 
 
 
@@ -141,7 +142,7 @@ list1 = DropDown(
     [COLOR_LIST_INACTIVE, COLOR_LIST_ACTIVE],
     50, 50, 200, 50, 
     pygame.font.SysFont(None, 30), 
-    "Select Algorithm", ["BubbleSort", "MergeSort", "InsertionSort", "CountingSort", "SelectionSort", "CombSort", "HeapSort", "CycleSort"])
+    "Select Algorithm", ["BubbleSort", "QuickSort", "InsertionSort", "CountingSort", "SelectionSort", "CombSort", "HeapSort", "CycleSort"])
 
 sortButton = Button(
     [COLOR_INACTIVE, COLOR_ACTIVE],
@@ -159,7 +160,7 @@ inputBox = InputBox(800, 50, 200, 50)
 
 functionDic = {
     "BubbleSort" : 0,
-    "MergeSort" : 1,
+    "QuickSort" : 1,
     "InsertionSort" : 2,
     "CountingSort" : 3,
     "SelectionSort" : 4,
@@ -178,53 +179,64 @@ def printList(l):
         print(x)
 
 def BubbleSort(l):
+    iteration = 0
+    iteration = 0
     indexLen = len(l)-1
     sorted = False
     while not sorted:
+        iteration += 1
         sorted = True
         for i in range(0, indexLen):
-            UpdateDisplay(l)
             if (i < indexLen):
                 if (l[i] > l[i + 1]):
                     l[i], l[i + 1] = l[i + 1], l[i]
                     sorted = False
+        if (iteration % speedMultiplier == 0):
+            UpdateDisplay(l)
     return l
 
-def MergeSort(l):
-    
-    
-    def merge(left, right, merged):
-        
-        left_cursor, right_cursor = 0, 0
-        while left_cursor < len(left) and right_cursor < len(right):
-        
-            if left[left_cursor] <= right[right_cursor]:
-                merged[left_cursor+right_cursor]=left[left_cursor]
-                left_cursor += 1
-            else:
-                merged[left_cursor + right_cursor] = right[right_cursor]
-                right_cursor += 1
-                
-        for left_cursor in range(left_cursor, len(left)):
-            merged[left_cursor + right_cursor] = left[left_cursor]
-            
-            
-        for right_cursor in range(right_cursor, len(right)):
-            merged[left_cursor + right_cursor] = right[right_cursor]
-        
-        return merged
-    
-    if len(l) <= 1:
-        return l
-    mid = len(l) // 2
-    left, right = MergeSort(l[:mid]), MergeSort(l[mid:])
-    UpdateDisplay(l)
-    return merge(left, right, l)
+
+
+def QuickSort(l):
+    iteration = 0
+    if len(l) < 2:                      # if nothing to sort, return
+        return
+    stack = []                          # initialize stack
+    stack.append([0, len(l)-1])
+    while len(stack) > 0: 
+        iteration += 1              # loop till stack empty
+        lo, hi = stack.pop()            # pop lo, hi indexes
+        p = l[(lo + hi) // 2]           # pivot, any a[] except a[hi]
+        i = lo - 1                      # Hoare partition
+        j = hi + 1
+        while(1):
+            if (iteration % speedMultiplier == 0):
+                UpdateDisplay(l)
+            while(1):                   #  while(a[++i] <; p)
+                i += 1
+                if(l[i] >= p):
+                    break
+            while(1):                   #  while(a[--j] <; p)
+                j -= 1
+                if(l[j] <= p):
+                    break
+            if(i >= j):                 #  if indexes met or crossed, break
+                break
+            l[i],l[j] = l[j],l[i]       #  else swap elements
+        if(j >  lo):                     # push indexes onto stack
+            stack.append([lo, j])
+        j += 1
+        if(hi >  j):
+            stack.append([j, hi])
+    return(l)
 
 def InsertionSort(l):
+    iteration = 0
     for i in range(1, len(l)):
-        while l[i-1] > l[i] and i > 0:
+        iteration += 1
+        if (iteration % speedMultiplier == 0):
             UpdateDisplay(l)
+        while l[i-1] > l[i] and i > 0:
             l[i-1], l[i] = l[i], l[i-1]
             i -= 1
     return l
@@ -239,17 +251,17 @@ def CountingSort(l):
     # storing the count of each element 
     for m in range(0, size):
         count[l[m]] += 1
-        UpdateDisplay(l)
+        #UpdateDisplay(l)
 
     # storing the cumulative count
     for m in range(1, size):
         count[m] += count[m - 1]
-        UpdateDisplay(l)
+        #UpdateDisplay(l)
 
     # place the elements in output array after finding the index of each element of original array in count array
     m = size - 1
     while m >= 0:
-        UpdateDisplay(l)
+        #UpdateDisplay(l)
         output[count[l[m]] - 1] = l[m]
         count[l[m]] -= 1
         m -= 1
@@ -259,19 +271,22 @@ def CountingSort(l):
         UpdateDisplay()
 
 def SelectionSort(l):
+    iteration = 0
     for i in range(0,len(l)-1):
+        iteration += 1
         p=0
         mini=l[-1]
         for j in range(i,len(l)):
             if l[j]<=mini:
                 mini=l[j]
                 p=j
-                UpdateDisplay(l)
         l[i],l[p]=l[p],l[i]
-        UpdateDisplay(l)
+        if (iteration % speedMultiplier == 0):
+            UpdateDisplay(l)
     return l
 
 def CombSort(l):
+    iteration = 0
     def getNextGap(gap):
         gap = (gap * 10)/13
         if gap < 1:
@@ -283,11 +298,12 @@ def CombSort(l):
     swapped = True
  
     while gap !=1 or swapped == 1:
-        UpdateDisplay(l)
         gap = getNextGap(gap)
         swapped = False
         for i in range(0, n-gap):
-            UpdateDisplay(l)
+            iteration += 1
+            if (iteration % speedMultiplier == 0):
+                UpdateDisplay(l)
             if l[i] > l[i + gap]:
                 l[i], l[i + gap]=l[i + gap], l[i]
                 swapped = True
@@ -296,9 +312,11 @@ def CombSort(l):
     return l
 
 def HeapSort(l):
-
+    iteration = 0
     def heapify(l, n, i):
-        UpdateDisplay(l)
+        iteration += 1
+        if (iteration % speedMultiplier == 0):
+            UpdateDisplay(l)
         largest = i  
         left = (2 * i) + 1    
         right = (2 * i) + 2 
@@ -370,7 +388,7 @@ def CaseMachine(value, l):
     if (value == 0):
         BubbleSort(l)
     elif (value == 1):
-        MergeSort(l)
+        QuickSort(l)
     elif (value == 2):
         InsertionSort(l)
     elif (value == 3):
@@ -403,7 +421,8 @@ def RandomizeList(l):
     for x in range(0,len(l)):
         randomInteger = random.randrange(0,len(l))
         l[x], l[randomInteger] = l[randomInteger], l[x]
-        UpdateDisplay(l)
+        if (x % 5 == 0):
+            UpdateDisplay(l)
     return l
 
 startList = RandomizeList(startList)
