@@ -1,14 +1,18 @@
+#------------------------------------Boilerplate-------------------------------------#
+#region
+
+from tkinter.tix import Tree
 from tracemalloc import start
-import pygame, sys, random, math
+import pygame, sys, random
 from pygame.locals import *
 pygame.init()
 pygame.display.set_caption("Sorting Visualizer")
-WIDTH = 1920
-HEIGHT = 1080
-SCREEN = pygame.display.set_mode((WIDTH,HEIGHT))
+WIDTH, HEIGHT = pygame.display.Info().current_w, pygame.display.Info().current_h
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 CLOCK = pygame.time.Clock()
 FONT = pygame.font.SysFont(None, 30)
 listLength = WIDTH
+oldLen = listLength
 COLOR_INACTIVE = (100, 80, 255)
 COLOR_ACTIVE = (100, 200, 255)
 COLOR_LIST_INACTIVE = (255, 100, 100)
@@ -16,9 +20,12 @@ COLOR_LIST_ACTIVE = (255, 150, 150)
 speedMultiplier = 5
 iteration = 0
 maxValue = 0
+startList = []
+algorithms = ["PythonSort", "BubbleSort", "QuickSort", "InsertionSort", "CountingSort", "SelectionSort", "CombSort", "HeapSort", "CycleSort", "RadixSort"]
 
-
-
+#endregion
+#-------------------------------------UI classes-------------------------------------#
+#region
 
 class DropDown():
 
@@ -122,14 +129,16 @@ class InputBox:
             if self.active:
                 if event.key == pygame.K_RETURN:
                     listLength = int(self.text)
-                    print(int(self.text))
                     self.text = ''
+                    self.active = False
+                    self.color = COLOR_INACTIVE
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]
                 else:
                     self.text += event.unicode
                 # Re-render the text.
                 self.txt_surface = FONT.render(self.text, True, (0,0,0))
+                
 
     def update(self):
         # Resize the box if the text is too long.
@@ -138,42 +147,14 @@ class InputBox:
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect, 0)
-        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        screen.blit(self.txt_surface, self.txt_surface.get_rect(center = self.rect.center))
+        if(self.active == False):
+            self.txt_surface = FONT.render("- - - - - - - - -", True, (0,0,0))
+            screen.blit(self.txt_surface, self.txt_surface.get_rect(center = self.rect.center))
 
-list1 = DropDown(
-    [COLOR_INACTIVE, COLOR_ACTIVE],
-    [COLOR_LIST_INACTIVE, COLOR_LIST_ACTIVE],
-    50, 50, 200, 50, 
-    pygame.font.SysFont(None, 30), 
-    "Select Algorithm", ["BubbleSort", "QuickSort", "InsertionSort", "CountingSort", "SelectionSort", "CombSort", "HeapSort", "CycleSort"])
-
-sortButton = Button(
-    [COLOR_INACTIVE, COLOR_ACTIVE],
-    300, 50, 200, 50, 
-    pygame.font.SysFont(None, 30), 
-    "Sort")
-
-shuffleButton = Button(
-    [COLOR_INACTIVE, COLOR_ACTIVE],
-    550, 50, 200, 50, 
-    pygame.font.SysFont(None, 30), 
-    "Shuffle")
-
-inputBox = InputBox(800, 50, 200, 50)
-
-functionDic = {
-    "BubbleSort" : 0,
-    "QuickSort" : 1,
-    "InsertionSort" : 2,
-    "CountingSort" : 3,
-    "SelectionSort" : 4,
-    "CombSort" : 5,
-    "HeapSort" : 6,
-    "CycleSort" : 7
-
-}
-i = 1
-startList = []
+#endregion
+#----------------------------------General Functions---------------------------------#
+#region
 
 def Sigmoid(x):
     return 1/(1 + 2.71828182846**(-x/(listLength/10)))
@@ -182,17 +163,64 @@ def GenerateList(len):
     startList.clear()
     global maxValue
     for i in range(1,len):
-        startList.append(Sigmoid(i-(len/2)))#+ (math.sin((i/(len/4)))+1)*100)
+        #startList.append(Sigmoid(i-(len/2)))#+ (math.sin((i/(len/4)))+1)*100)
+        startList.append(i)
     maxValue = max(startList)
     return startList
-
-GenerateList(listLength)
-
-print(min(startList))
 
 def printList(l):
     for i, x in enumerate(l):
         print(x)
+
+def UpdateDisplay(lst = startList): 
+    global iteration
+    thickness = 1
+    iteration += 1
+    if (iteration % speedMultiplier == 0):
+        SCREEN.fill((0,0,0))      
+        if (WIDTH//listLength < 1):
+            thickness = 1
+        else:
+            thickness = WIDTH//listLength
+        for i, x in enumerate(lst):
+            pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) , HEIGHT - (x*(HEIGHT/maxValue))), thickness)
+    selectionDropDown.draw(SCREEN) 
+    sortButton.draw(SCREEN)
+    shuffleButton.draw(SCREEN)
+    listSizeInputBox.draw(SCREEN)
+    pygame.display.update()
+
+def CheckListSorted():
+    sorted = True
+    lastVal = 0
+    for i in range(0, listLength-1):
+        if (lastVal > startList[i]):
+            sorted = False
+        lastVal = startList[i]
+    return sorted
+
+def Sort(function, l):
+    global startList
+    if (function == 'Select Algorithm'):
+        return
+    startList = eval(function + "(l)")
+    print(CheckListSorted())
+
+def RandomizeList(l):
+    for x in range(0,len(l)):
+        randomInteger = random.randrange(0,len(l))
+        l[x], l[randomInteger] = l[randomInteger], l[x]
+        if (x % 5 == 0):
+            UpdateDisplay(l)
+    return l
+
+#endregion
+#---------------------------------Sorting Algorithms---------------------------------#
+#region
+
+def PythonSort(l):
+    l.sort()
+    return l
 
 def BubbleSort(l):
     indexLen = len(l)-1
@@ -254,7 +282,7 @@ def CountingSort(l):
 
     # storing the count of each element 
     for m in range(0, size):
-        count[l[m]] += 1
+        count[l[m]-1] += 1
         #UpdateDisplay(l)
 
     # storing the cumulative count
@@ -265,14 +293,13 @@ def CountingSort(l):
     # place the elements in output array after finding the index of each element of original array in count array
     m = size - 1
     while m >= 0:
-        #UpdateDisplay(l)
-        output[count[l[m]] - 1] = l[m]
-        count[l[m]] -= 1
+        output[count[l[m]-1] - 1] = l[m]
+        count[l[m]-1] -= 1
         m -= 1
 
     for m in range(0, size):
         l[m] = output[m]
-        UpdateDisplay()
+        UpdateDisplay(l)
 
 def SelectionSort(l):
     for i in range(0,len(l)-1):
@@ -379,83 +406,123 @@ def CycleSort(l):
     
   return l
 
-def CaseMachine(value, l):
-    if (value == 0):
-        BubbleSort(l)
-    elif (value == 1):
-        QuickSort(l)
-    elif (value == 2):
-        InsertionSort(l)
-    elif (value == 3):
-        CountingSort(l)
-    elif (value == 4):
-        SelectionSort(l)
-    elif (value == 5):
-        CombSort(l)
-    elif (value == 6):
-        HeapSort(l)
-    elif (value == 7):
-        CycleSort(l)
+def RadixSort(l):
+    def countingSortForRadix(l, placeValue):
+        # We can assume that the number of digits used to represent
+        # all numbers on the placeValue position is not grater than 10
+        countArray = [0] * 10
+        inputSize = len(l)
 
-def Sort(function, l):
-    if (function == 'Select Algorithm'):
-        return
-    CaseMachine(functionDic[function], l)
+        # placeElement is the value of the current place value
+        # of the current element, e.g. if the current element is
+        # 123, and the place value is 10, the placeElement is
+        # equal to 2
+        for i in range(inputSize): 
+            placeElement = int((l[i] // placeValue) % 10)
+            countArray[placeElement] += 1
 
-def UpdateDisplay(lst = startList): 
-    global iteration
-    thickness = 1
-    iteration += 1
-    if (iteration % speedMultiplier == 0):
-        SCREEN.fill((0,0,0))      
-        if (WIDTH//listLength < 1):
-            thickness = 1
-        else:
-            thickness = WIDTH//listLength
-        for i, x in enumerate(lst):
-            pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength//2 ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength//2 , HEIGHT - (x*(HEIGHT/maxValue))), thickness)
-    list1.draw(SCREEN) 
-    sortButton.draw(SCREEN)
-    shuffleButton.draw(SCREEN)
-    inputBox.draw(SCREEN)
-    pygame.display.update()
+        for i in range(1, 10):
+            countArray[i] += countArray[i-1]
 
-def RandomizeList(l):
-    for x in range(0,len(l)):
-        randomInteger = random.randrange(0,len(l))
-        l[x], l[randomInteger] = l[randomInteger], l[x]
-        if (x % 5 == 0):
-            UpdateDisplay(l)
+        # Reconstructing the output array
+        outputArray = [0] * inputSize
+        i = inputSize - 1
+        while i >= 0:
+            currentEl = l[i]
+            placeElement = int((l[i] // placeValue) % 10)
+            countArray[placeElement] -= 1
+            newPosition = countArray[placeElement]
+            outputArray[newPosition] = currentEl
+            UpdateDisplay(outputArray)
+            i -= 1
+            
+        return outputArray
+    # Step 1 -> Find the maximum element in the input array
+    # Step 2 -> Find the number of digits in the `max` element
+    D = len(str(max(l)))
+    
+    # Step 3 -> Initialize the place value to the least significant place
+    placeVal = 1
+
+    # Step 4
+    outputArray = l
+    while D > 0:
+        #l = outputArray
+        UpdateDisplay(outputArray)
+        outputArray = countingSortForRadix(outputArray, placeVal)
+        placeVal *= 10  
+        D -= 1
+        if (outputArray == l.sort()):
+            D = 0
+    l = outputArray
     return l
 
-#RandomizeList(startList)
+#endregion
+#-----------------------------------Initialization-----------------------------------#
+#region
 
-def CheckListLenChange(old, new):
-    if (old != new):
-        return True
-    return False
+selectionDropDown = DropDown(
+    [COLOR_INACTIVE, COLOR_ACTIVE],
+    [COLOR_LIST_INACTIVE, COLOR_LIST_ACTIVE],
+    50, 50, 200, 50, 
+    pygame.font.SysFont(None, 30), 
+    "Select Algorithm", algorithms)
 
-oldLen = listLength
+sortButton = Button(
+    [COLOR_INACTIVE, COLOR_ACTIVE],
+    300, 50, 200, 50, 
+    pygame.font.SysFont(None, 30), 
+    "Sort")
+
+shuffleButton = Button(
+    [COLOR_INACTIVE, COLOR_ACTIVE],
+    550, 50, 200, 50, 
+    pygame.font.SysFont(None, 30), 
+    "Shuffle")
+
+listSizeInputBox = InputBox(
+    800, 
+    50, 
+    200, 
+    50)
+
+GenerateList(
+    listLength)
+
+#endregion
+#------------------------------------Program Loop------------------------------------#
+#region
 
 while 1:
+
+    #List length change event handler
     newLen = listLength
     if (oldLen != newLen):
         GenerateList(listLength)
         startList = RandomizeList(startList)
         maxValue = max(startList)
     oldLen = listLength
-    UpdateDisplay(startList)
+
+    #Input handler
     event_list = pygame.event.get()
     for event in event_list:
-        inputBox.handle_event(event)
+        listSizeInputBox.handle_event(event)
         if event.type == QUIT:
             sys.exit()  
-    selected_option = list1.update(event_list)
+
+    #Update chosen algorithm
+    selected_option = selectionDropDown.update(event_list)
     if selected_option >= 0:
-        list1.main = list1.options[selected_option]
+        selectionDropDown.main = selectionDropDown.options[selected_option]
     
+    #Detect 'Sort' and 'Shuffle' button presses
     if sortButton.update(event_list):
-        Sort(list1.main, startList)
+        Sort(selectionDropDown.main, startList)
     if shuffleButton.update(event_list):
         RandomizeList(startList)
-    inputBox.update()
+
+    #General update
+    UpdateDisplay(startList)
+    listSizeInputBox.update()
+
+#endregion
