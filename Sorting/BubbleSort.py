@@ -1,7 +1,6 @@
 #------------------------------------Boilerplate-------------------------------------#
 #region
 
-
 import pygame, sys, random, time
 from pygame.locals import *
 pygame.init()
@@ -166,8 +165,8 @@ def GenerateList(len):
     startList.clear()
     global maxValue
     for i in range(1,len):
-        #startList.append(round(Sigmoid(i-(len/2))))#+ (math.sin((i/(len/4)))+1)*100)
-        startList.append(i)
+        startList.append(round(Sigmoid(i-(len/2))))#+ (math.sin((i/(len/4)))+1)*100)
+        #startList.append(i)
     maxValue = max(startList)
     return startList
 
@@ -218,6 +217,7 @@ def Sort(function, l):
     if (function == 'Select Algorithm'):
         return
     startList = eval(function + "(l)")
+    UpdateDisplay(l)
     print(CheckListSorted())
 
 def RandomizeList(l):
@@ -308,12 +308,12 @@ def CountingSort(l):
     while m >= 0:
         output[count[l[m]-1] - 1] = l[m]
         count[l[m]-1] -= 1
+        UpdateDisplay(output)
         m -= 1
 
     
     for m in range(0, size):
         l[m] = output[m]
-        UpdateDisplay(l)
 
     return l
 
