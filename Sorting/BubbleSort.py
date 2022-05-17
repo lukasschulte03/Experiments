@@ -1,9 +1,8 @@
 #------------------------------------Boilerplate-------------------------------------#
 #region
 
-from tkinter.tix import Tree
-from tracemalloc import start
-import pygame, sys, random
+
+import pygame, sys, random, time
 from pygame.locals import *
 pygame.init()
 pygame.display.set_caption("Sorting Visualizer")
@@ -17,11 +16,15 @@ COLOR_INACTIVE = (100, 80, 255)
 COLOR_ACTIVE = (100, 200, 255)
 COLOR_LIST_INACTIVE = (255, 100, 100)
 COLOR_LIST_ACTIVE = (255, 150, 150)
+COLOR_CHECKING = (0, 255, 0)
+COLOR_BASE = (255, 255, 255)
+COLOR_CURRENT = (255, 255, 255)
 speedMultiplier = 5
 iteration = 0
 maxValue = 0
+coloringIndex = 0
 startList = []
-algorithms = ["PythonSort", "BubbleSort", "QuickSort", "InsertionSort", "CountingSort", "SelectionSort", "CombSort", "HeapSort", "CycleSort", "RadixSort"]
+algorithms = ["PythonSort", "BubbleSort", "QuickSort", "InsertionSort", "CountingSort", "SelectionSort", "CombSort", "HeapSort", "CycleSort", "RadixSort", "RadixSortLSD", "MergeSort"]
 
 #endregion
 #-------------------------------------UI classes-------------------------------------#
@@ -157,13 +160,13 @@ class InputBox:
 #region
 
 def Sigmoid(x):
-    return 1/(1 + 2.71828182846**(-x/(listLength/10)))
+    return (1/(1 + 2.71828182846**(-x/(listLength/10))))*HEIGHT
 
 def GenerateList(len):
     startList.clear()
     global maxValue
     for i in range(1,len):
-        #startList.append(Sigmoid(i-(len/2)))#+ (math.sin((i/(len/4)))+1)*100)
+        #startList.append(round(Sigmoid(i-(len/2))))#+ (math.sin((i/(len/4)))+1)*100)
         startList.append(i)
     maxValue = max(startList)
     return startList
@@ -172,18 +175,18 @@ def printList(l):
     for i, x in enumerate(l):
         print(x)
 
-def UpdateDisplay(lst = startList): 
-    global iteration
+def UpdateDisplay(lst = startList, additionalMultiplier = 1): 
+    global iteration, COLOR_CURRENT, coloringIndex, _sorted
     thickness = 1
     iteration += 1
-    if (iteration % speedMultiplier == 0):
+    if (iteration % (speedMultiplier * additionalMultiplier) == 0):
         SCREEN.fill((0,0,0))      
         if (WIDTH//listLength < 1):
             thickness = 1
         else:
             thickness = WIDTH//listLength
         for i, x in enumerate(lst):
-            pygame.draw.line(SCREEN, (255,255,255), (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) , HEIGHT - (x*(HEIGHT/maxValue))), thickness)
+            pygame.draw.line(SCREEN, COLOR_BASE, (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) , HEIGHT - (x*(HEIGHT/maxValue))), thickness)
     selectionDropDown.draw(SCREEN) 
     sortButton.draw(SCREEN)
     shuffleButton.draw(SCREEN)
@@ -191,15 +194,26 @@ def UpdateDisplay(lst = startList):
     pygame.display.update()
 
 def CheckListSorted():
+    global COLOR_CURRENT
     sorted = True
     lastVal = 0
     for i in range(0, listLength-1):
         if (lastVal > startList[i]):
             sorted = False
         lastVal = startList[i]
+    if (sorted):
+        if (WIDTH//listLength < 1):
+            thickness = 1
+        else:
+            thickness = WIDTH//listLength
+        for i, x in enumerate(startList):
+            pygame.draw.line(SCREEN, COLOR_CHECKING, (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) ,HEIGHT), (i * (WIDTH/listLength) + WIDTH//listLength*(3/2) , HEIGHT - (x*(HEIGHT/maxValue))), thickness)
+            pygame.display.update()
     return sorted
 
 def Sort(function, l):
+    if CheckListSorted():
+        return
     global startList
     if (function == 'Select Algorithm'):
         return
@@ -220,6 +234,7 @@ def RandomizeList(l):
 
 def PythonSort(l):
     l.sort()
+    UpdateDisplay(l, 0.1)
     return l
 
 def BubbleSort(l):
@@ -283,12 +298,10 @@ def CountingSort(l):
     # storing the count of each element 
     for m in range(0, size):
         count[l[m]-1] += 1
-        #UpdateDisplay(l)
 
     # storing the cumulative count
     for m in range(1, size):
         count[m] += count[m - 1]
-        #UpdateDisplay(l)
 
     # place the elements in output array after finding the index of each element of original array in count array
     m = size - 1
@@ -297,9 +310,12 @@ def CountingSort(l):
         count[l[m]-1] -= 1
         m -= 1
 
+    
     for m in range(0, size):
         l[m] = output[m]
         UpdateDisplay(l)
+
+    return l
 
 def SelectionSort(l):
     for i in range(0,len(l)-1):
@@ -338,7 +354,7 @@ def CombSort(l):
 
 def HeapSort(l):
     def heapify(l, n, i):
-        UpdateDisplay(l)
+        UpdateDisplay(l, 4)
         largest = i  
         left = (2 * i) + 1    
         right = (2 * i) + 2 
@@ -363,6 +379,8 @@ def HeapSort(l):
     for i in range(n-1, 0, -1):
         l[i], l[0] = l[0], l[i]
         heapify(l, i, 0)
+    
+    return l
 
 def CycleSort(l):
   writes = 0
@@ -455,6 +473,79 @@ def RadixSort(l):
         if (outputArray == l.sort()):
             D = 0
     l = outputArray
+    return l
+
+def RadixSortLSD(l):
+    RADIX = 10
+    buckets = [[] for i in range(RADIX)]
+
+    # sort
+    tmp = -1; placement = 1
+    for i in range(len(str(max(l)))):
+
+		# split input between lists
+        for i in l:
+            tmp = i // placement
+            buckets[tmp % RADIX].append(i)
+
+		
+		# empty lists into input array
+        a = 0
+        for bucket in buckets:
+            for i in bucket:
+                l[a] = i
+                a += 1
+                display = []
+                display.append(i)
+                UpdateDisplay(l)       
+            bucket.clear()
+		
+		# move to next digit
+        placement *= RADIX
+    return l
+
+def MergeSort(l):
+
+    def join(l1, l2):
+        i = 0
+        j = 0
+        outputvetor = []
+        while i < len(l1) and j < len(l2):
+            if l1[i] < l2[j]:
+                outputvetor.append(l1[i])
+                i = i + 1
+            else:
+                outputvetor.append(l2[j])
+                j = j + 1
+        
+        if(i < len(l1)):
+            for x in range (i, len(l1)):
+                outputvetor.append(l1[x])
+
+        if(j < len(l2)):
+            for x in range (j, len(l2)):
+                outputvetor.append(l2[x])
+        return outputvetor
+
+    block = 1
+    n = len(l)
+    while block < n:
+        output = []
+        i1 = 0
+        i2 = block
+        while i2 < n:
+            outPutList = join(l[i1:i2], l[i2:(i2 + block)])
+            output += outPutList
+            i = 0
+            x = i1
+            while x < i2 + block and i < len(outPutList) :
+                UpdateDisplay(l, 3)
+                l[x] = outPutList[i]
+                i = i + 1
+                x = x + 1
+            i1 = i2 + block
+            i2 = i1 + block
+        block = block * 2
     return l
 
 #endregion
