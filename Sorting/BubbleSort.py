@@ -165,8 +165,8 @@ def GenerateList(len):
     startList.clear()
     global maxValue
     for i in range(1,len):
-        startList.append(round(Sigmoid(i-(len/2))))#+ (math.sin((i/(len/4)))+1)*100)
-        #startList.append(i)
+        #startList.append(round(Sigmoid(i-(len/2))))#+ (math.sin((i/(len/4)))+1)*100)
+        startList.append(i)
     maxValue = max(startList)
     return startList
 
